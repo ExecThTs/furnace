@@ -1914,13 +1914,51 @@ void FurnaceGUI::openFileDialog(FurnaceGUIFileDialogs type) {
       break;
     case GUI_FILE_SAMPLE_OPEN:
     case GUI_FILE_SAMPLE_OPEN_REPLACE:
+      prevSample = -3;
+      prevSampleData = new DivSample;
+      *prevSampleData = *e->getSample(curSample);
       if (!dirExists(workingDirSample)) workingDirSample=getHomeDir();
       hasOpened=fileDialog->openLoad(
         _("Load Sample"),
         audioLoadFormats,
         workingDirSample,
         dpiScale,
-        NULL, // TODO
+        [this](const char* path) {
+          if (path != NULL) {
+            logI("Callback Result: %s", path);
+            // !!!!
+            int sampleCountBefore = e->song.sampleLen;
+            std::vector<DivSample*> samples = e->sampleFromFile(path);
+            if (!samples.empty()) {
+              logI("Got samples");
+              if (e->song.sampleLen != sampleCountBefore) {
+                logI("Rendering samples...");
+                e->renderSamplesP();
+              }
+              if (curFileDialog == GUI_FILE_SAMPLE_OPEN_REPLACE) {
+                //logI("prevSample is %s, curSample is %s", prevSample, curSample);
+                if (prevSample == -3) {
+                  prevSample = curSample;
+                }
+                if (prevSample >= 0 && prevSample <= (int)e->song.ins.size()) {
+                  //logI("Temporarily replacing sample %s with %s");
+                  *e->song.sample[prevSample] = *samples[0];
+                }
+              }
+              else {
+                e->loadTempSample(samples[0]);
+                if (curSample != -2) {
+                  prevSample = curSample;
+                }
+                curIns = -2;
+              }
+            }
+            for (DivSample* i : samples) delete i;
+          }
+          else {
+            logI("Callback Result: NULL");
+          }
+        },
         (type==GUI_FILE_SAMPLE_OPEN)
       );
       break;

@@ -2660,6 +2660,15 @@ void DivEngine::loadTempIns(DivInstrument* which) {
   BUSY_END;
 }
 
+void DivEngine::loadTempSample(DivSample* which) {
+  BUSY_BEGIN;
+  if (tempSample == NULL) {
+    tempSample = new DivSample;
+  }
+  *tempSample = *which;
+  BUSY_END;
+}
+
 void DivEngine::delInstrumentUnsafe(int index) {
   if (index>=0 && index<(int)song.ins.size()) {
     for (int i=0; i<song.systemLen; i++) {

@@ -682,6 +682,7 @@ class DivEngine {
     DivChannelData* curPat;
     DivSubSong* curSubSong;
     DivInstrument* tempIns;
+    DivSample* tempSample;
     DivSystem sysOfChan[DIV_MAX_CHANS];
     int dispatchOfChan[DIV_MAX_CHANS];
     int dispatchChanOfChan[DIV_MAX_CHANS];
@@ -1077,6 +1078,9 @@ class DivEngine {
 
     // get raw sample
     DivSample* sampleFromFileRaw(const char* path, DivSampleDepth depth, int channels, bool bigEndian, bool unsign, bool swapNibbles, int rate);
+
+    // load temporary sample
+    void loadTempSample(DivSample* which);
 
     // delete sample
     void delSample(int index);
